@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HN Digest</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>HN Digest</h1>
+      <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+    </header>
+
+    <div id="notHnPage" class="message hidden">
+      <p>🔗 Navigate to a Hacker News page to use this extension.</p>
+      <a href="https://news.ycombinator.com" target="_blank" class="btn btn-secondary">Open Hacker News</a>
+    </div>
+
+    <div id="noApiKey" class="message hidden">
+      <p>🔑 API key required</p>
+      <p class="subtext">Add your OpenAI or OpenRouter API key in settings.</p>
+      <button id="openSettings" class="btn btn-primary">Configure API Key</button>
+    </div>
+
+    <div id="pageInfo" class="hidden">
+      <div class="page-type">
+        <span id="pageTypeLabel" class="badge">Story</span>
+        <span id="storyTitle" class="story-title"></span>
+      </div>
+      
+      <div id="storyMeta" class="meta">
+        <span id="points">0 points</span>
+        <span class="separator">•</span>
+        <span id="comments">0 comments</span>
+        <span class="separator">•</span>
+        <span id="author">by unknown</span>
+      </div>
+
+      <div class="actions">
+        <button id="summarizeBtn" class="btn btn-primary">
+          <span class="btn-text">Summarize Discussion</span>
+          <span class="btn-loading hidden">⏳ Loading...</span>
+        </button>
+        <button id="interestingBtn" class="btn btn-secondary">
+          Find Interesting
+        </button>
+      </div>
+    </div>
+
+    <div id="listPageInfo" class="hidden">
+      <div class="page-type">
+        <span id="listPageTypeLabel" class="badge">Front Page</span>
+      </div>
+      <p class="subtext">Found <span id="storyCount">0</span> stories on this page.</p>
+      <p class="hint">Click on a story to summarize its discussion.</p>
+    </div>
+
+    <div id="results" class="hidden">
+      <div class="tabs">
+        <button class="tab active" data-tab="summary">Summary</button>
+        <button class="tab" data-tab="interesting">Interesting</button>
+        <button class="tab" data-tab="stats">Stats</button>
+      </div>
+
+      <div id="summaryContent" class="tab-content active">
+        <div id="tldr" class="section">
+          <h3>TL;DR</h3>
+          <p id="tldrText"></p>
+        </div>
+        
+        <div id="keyPoints" class="section">
+          <h3>Key Points</h3>
+          <ul id="keyPointsList"></ul>
+        </div>
+        
+        <div id="perspectives" class="section">
+          <h3>Notable Perspectives</h3>
+          <ul id="perspectivesList"></ul>
+        </div>
+        
+        <div id="sentiment" class="section">
+          <h3>Sentiment</h3>
+          <p id="sentimentText"></p>
+        </div>
+      </div>
+
+      <div id="interestingContent" class="tab-content">
+        <div id="interestingComments" class="comments-list"></div>
+      </div>
+
+      <div id="statsContent" class="tab-content">
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-value" id="statComments">0</span>
+            <span class="stat-label">Comments</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statAuthors">0</span>
+            <span class="stat-label">Authors</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statAvgLen">0</span>
+            <span class="stat-label">Avg Length</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statDepth">0</span>
+            <span class="stat-label">Max Depth</span>
+          </div>
+        </div>
+        <div id="topAuthors" class="section">
+          <h3>Top Contributors</h3>
+          <ul id="topAuthorsList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <p id="loadingText">Fetching discussion...</p>
+    </div>
+
+    <div id="error" class="message error hidden">
+      <p id="errorText"></p>
+      <button id="retryBtn" class="btn btn-secondary">Retry</button>
+    </div>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

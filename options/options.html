@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HN Digest Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⚙️ HN Digest Settings</h1>
+    </header>
+
+    <form id="settingsForm">
+      <section class="section">
+        <h2>AI Provider</h2>
+        
+        <div class="form-group">
+          <label for="provider">Provider</label>
+          <select id="provider" name="provider">
+            <option value="openai">OpenAI</option>
+            <option value="openrouter">OpenRouter</option>
+          </select>
+          <p class="help-text" id="providerHelp">
+            Direct access to GPT models.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="apiKey">API Key</label>
+          <div class="input-with-button">
+            <input type="password" id="apiKey" name="apiKey" placeholder="sk-... or sk-or-...">
+            <button type="button" id="toggleKey" class="btn-icon" title="Show/Hide">👁️</button>
+          </div>
+          <p class="help-text">
+            Your API key is stored locally and never sent anywhere except the AI provider.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="model">Model</label>
+          <select id="model" name="model">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Test Connection</h2>
+        <p class="help-text">Verify your API key works correctly.</p>
+        <button type="button" id="testBtn" class="btn btn-secondary">
+          Test Connection
+        </button>
+        <div id="testResult" class="test-result hidden"></div>
+      </section>
+
+      <section class="section">
+        <h2>Quick Links</h2>
+        <div class="links">
+          <a href="https://platform.openai.com/api-keys" target="_blank" class="link-card">
+            <span class="link-icon">🔑</span>
+            <span class="link-text">
+              <strong>OpenAI API Keys</strong>
+              <small>Get your OpenAI API key</small>
+            </span>
+          </a>
+          <a href="https://openrouter.ai/keys" target="_blank" class="link-card">
+            <span class="link-icon">🔑</span>
+            <span class="link-text">
+              <strong>OpenRouter API Keys</strong>
+              <small>Get your OpenRouter API key</small>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <span id="saveStatus" class="save-status hidden">✓ Saved</span>
+      </div>
+    </form>
+  </div>
+
+  <script src="options.js" type="module"></script>
+</body>
+</html>
