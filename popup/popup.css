@@ -359,3 +359,16 @@ h1 {
   color: var(--text-secondary);
   font-size: 12px;
 }
+
+.badge-cached {
+  font-size: 11px;
+  background-color: #e3e3e3;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-right: 6px;
+  font-weight: 600;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: help;
+}

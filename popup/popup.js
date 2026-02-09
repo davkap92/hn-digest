@@ -244,7 +244,12 @@ async function handleFindInteresting() {
 function displaySummary(summary) {
   const { parsed } = summary;
   console.log('Parsed summary:', parsed);
-  elements.tldrText.textContent = parsed.tldr || 'No summary available';
+  
+  const cachedHtml = summary.cached 
+    ? '<span class="badge-cached" title="Loaded from local cache (24h)">⚡️ Cached</span>' 
+    : '';
+    
+  elements.tldrText.innerHTML = cachedHtml + escapeHtml(parsed.tldr || 'No summary available');
   
   elements.keyPointsList.innerHTML = parsed.keyPoints.length > 0
     ? parsed.keyPoints.map(p => `<li>${escapeHtml(p)}</li>`).join('')
