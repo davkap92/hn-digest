@@ -1,4 +1,4 @@
-# HN Digest
+# HN Digest - Chrome Extension
 
 AI-powered summaries of Hacker News discussions.
 
