@@ -9,6 +9,8 @@ AI-powered summaries of Hacker News discussions.
 - 📊 **Discussion Stats** - Comment counts, top authors, thread depth
 - 🔑 **BYOK (Bring Your Own Key)** - Use your OpenAI or OpenRouter API key
 
+<img width="407" height="597" alt="image" src="https://github.com/user-attachments/assets/d28a9282-e8e7-42a6-9406-e905facb7412" />
+
 ## Installation
 
 1. Clone or download this repository
