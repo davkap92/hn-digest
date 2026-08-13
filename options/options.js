@@ -4,6 +4,7 @@ import {
   saveApiSettings, 
   getModelsForProvider,
   getProviders,
+  getOpenRouterReasoningEfforts,
   testConnection 
 } from '../lib/ai-client.js';
 
@@ -13,6 +14,8 @@ const elements = {
   provider: document.getElementById('provider'),
   apiKey: document.getElementById('apiKey'),
   model: document.getElementById('model'),
+  reasoningEffort: document.getElementById('reasoningEffort'),
+  reasoningEffortGroup: document.getElementById('reasoningEffortGroup'),
   toggleKey: document.getElementById('toggleKey'),
   testBtn: document.getElementById('testBtn'),
   testResult: document.getElementById('testResult'),
@@ -30,6 +33,7 @@ const providerDescriptions = {
  * Initialize options page
  */
 async function init() {
+  updateReasoningEffortOptions();
   setupEventListeners();
   await loadSettings();
 }
@@ -56,6 +60,8 @@ async function loadSettings() {
   // Update model options
   updateModelOptions(settings.provider);
   elements.model.value = settings.model;
+  elements.reasoningEffort.value = settings.reasoningEffort;
+  updateReasoningEffortVisibility(settings.provider);
   
   // Update help text
   elements.providerHelp.textContent = providerDescriptions[settings.provider];
@@ -71,6 +77,7 @@ function handleProviderChange() {
   updateModelOptions(provider);
   elements.model.value = providers[provider].defaultModel;
   elements.providerHelp.textContent = providerDescriptions[provider];
+  updateReasoningEffortVisibility(provider);
   
   // Hide test result when changing provider
   elements.testResult.classList.add('hidden');
@@ -85,6 +92,34 @@ function updateModelOptions(provider) {
   elements.model.innerHTML = models
     .map(m => `<option value="${m}">${m}</option>`)
     .join('');
+}
+
+/**
+ * Populate the OpenRouter reasoning effort options.
+ */
+function updateReasoningEffortOptions() {
+  const efforts = getOpenRouterReasoningEfforts();
+  elements.reasoningEffort.innerHTML = [
+    '<option value="">Model default</option>',
+    ...efforts.map(effort => (
+      `<option value="${effort}">${formatReasoningEffort(effort)}</option>`
+    ))
+  ].join('');
+}
+
+/**
+ * Show reasoning effort only when OpenRouter is selected.
+ */
+function updateReasoningEffortVisibility(provider) {
+  elements.reasoningEffortGroup.classList.toggle('hidden', provider !== 'openrouter');
+}
+
+/**
+ * Format a reasoning effort value for display.
+ */
+function formatReasoningEffort(effort) {
+  if (effort === 'xhigh') return 'Extra high';
+  return effort.charAt(0).toUpperCase() + effort.slice(1);
 }
 
 /**
@@ -113,7 +148,8 @@ async function handleTestConnection() {
   await saveApiSettings({
     provider: elements.provider.value,
     apiKey: elements.apiKey.value,
-    model: elements.model.value
+    model: elements.model.value,
+    reasoningEffort: elements.reasoningEffort.value
   });
   
   try {
@@ -149,7 +185,8 @@ async function handleSave(e) {
   await saveApiSettings({
     provider: elements.provider.value,
     apiKey: elements.apiKey.value,
-    model: elements.model.value
+    model: elements.model.value,
+    reasoningEffort: elements.reasoningEffort.value
   });
   
   // Show save confirmation

@@ -27,8 +27,9 @@ AI-powered summaries of Hacker News discussions.
    - **OpenAI** - Direct GPT access ([Get API key](https://platform.openai.com/api-keys))
    - **OpenRouter** - 100+ models, often cheaper ([Get API key](https://openrouter.ai/keys))
 4. Enter your API key
-5. Click "Test Connection" to verify
-6. Save settings
+5. For OpenRouter, optionally choose a reasoning effort for supported models
+6. Click "Test Connection" to verify
+7. Save settings
 
 ## Usage
 
