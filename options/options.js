@@ -100,8 +100,10 @@ function updateModelOptions(provider) {
 function updateReasoningEffortOptions() {
   const efforts = getOpenRouterReasoningEfforts();
   elements.reasoningEffort.innerHTML = [
+    '<option value="none">Off</option>',
     '<option value="">Model default</option>',
     ...efforts.map(effort => (
+      effort === 'none' ? '' :
       `<option value="${effort}">${formatReasoningEffort(effort)}</option>`
     ))
   ].join('');

@@ -2,9 +2,10 @@
 import { fetchItem, prepareForSummarization } from '../lib/hn-api.js';
 import { 
   getApiSettings, 
-  summarizeDiscussion, 
   findInterestingComments 
 } from '../lib/ai-client.js';
+
+const SUMMARY_JOB_PREFIX = 'hn_digest_summary_job_';
 
 // DOM Elements
 const elements = {
@@ -33,6 +34,7 @@ const elements = {
   summarizeBtn: document.getElementById('summarizeBtn'),
   interestingBtn: document.getElementById('interestingBtn'),
   retryBtn: document.getElementById('retryBtn'),
+  summaryStatus: document.getElementById('summaryStatus'),
   
   // Results
   tldrText: document.getElementById('tldrText'),
@@ -56,6 +58,7 @@ const elements = {
 // State
 let currentContext = null;
 let currentData = null;
+let currentSummaryJob = null;
 
 /**
  * Initialize popup
@@ -74,6 +77,7 @@ function setupEventListeners() {
   elements.summarizeBtn.addEventListener('click', handleSummarize);
   elements.interestingBtn.addEventListener('click', handleFindInteresting);
   elements.retryBtn.addEventListener('click', () => checkPageContext());
+  chrome.storage.onChanged.addListener(handleStorageChanges);
   
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
@@ -163,6 +167,7 @@ async function showItemPage(context) {
     
     hideLoading();
     elements.pageInfo.classList.remove('hidden');
+    await restoreSummaryJob(item.id);
   } catch (error) {
     console.error('Error fetching item:', error);
     hideLoading();
@@ -192,24 +197,37 @@ function showListPage(context) {
  * Handle summarize button click
  */
 async function handleSummarize() {
-  if (!currentData) return;
+  if (!currentData || currentSummaryJob?.status === 'running') return;
   
-  elements.summarizeBtn.classList.add('loading');
-  elements.summarizeBtn.disabled = true;
-  elements.interestingBtn.disabled = true;
+  const forceRefresh = currentSummaryJob?.status === 'complete';
+  applySummaryJob({
+    storyId: currentData.story.id,
+    storyTitle: currentData.story.title,
+    status: 'running',
+    startedAt: Date.now(),
+    updatedAt: Date.now()
+  });
   
   try {
-    const summary = await summarizeDiscussion(currentData);
-    displaySummary(summary);
-    elements.results.classList.remove('hidden');
-    switchTab('summary');
+    const response = await chrome.runtime.sendMessage({
+      action: 'startSummaryJob',
+      data: currentData,
+      forceRefresh
+    });
+
+    if (!response?.success) {
+      throw new Error(response?.error || 'Failed to start background summarization.');
+    }
+
+    applySummaryJob(response.job);
   } catch (error) {
     console.error('Error summarizing:', error);
-    showError(`Summarization failed: ${error.message}`);
-  } finally {
-    elements.summarizeBtn.classList.remove('loading');
-    elements.summarizeBtn.disabled = false;
-    elements.interestingBtn.disabled = false;
+    applySummaryJob({
+      storyId: currentData.story.id,
+      status: 'error',
+      updatedAt: Date.now(),
+      error: error.message || 'Summarization failed.'
+    });
   }
 }
 
@@ -234,8 +252,97 @@ async function handleFindInteresting() {
   } finally {
     elements.interestingBtn.disabled = false;
     elements.interestingBtn.textContent = 'Find Interesting';
-    elements.summarizeBtn.disabled = false;
+    elements.summarizeBtn.disabled = currentSummaryJob?.status === 'running';
   }
+}
+
+/**
+ * Restore a background summary job when the popup is reopened.
+ */
+async function restoreSummaryJob(storyId) {
+  try {
+    const response = await chrome.runtime.sendMessage({
+      action: 'getSummaryJob',
+      storyId
+    });
+
+    if (!response?.success) {
+      throw new Error(response?.error || 'Failed to restore summary status.');
+    }
+
+    applySummaryJob(response.job);
+  } catch (error) {
+    console.warn('Failed to restore summary job:', error);
+    applySummaryJob(null);
+  }
+}
+
+/**
+ * React to persisted job updates while the popup is open.
+ */
+function handleStorageChanges(changes, areaName) {
+  if (areaName !== 'local' || !currentData?.story?.id) return;
+
+  const key = `${SUMMARY_JOB_PREFIX}${currentData.story.id}`;
+  if (changes[key]) {
+    applySummaryJob(changes[key].newValue || null);
+  }
+}
+
+/**
+ * Render the current background job state.
+ */
+function applySummaryJob(job) {
+  currentSummaryJob = job;
+  const buttonText = elements.summarizeBtn.querySelector('.btn-text');
+
+  elements.summarizeBtn.classList.toggle('loading', job?.status === 'running');
+  elements.summarizeBtn.disabled = job?.status === 'running';
+  elements.summaryStatus.className = 'summary-status hidden';
+
+  if (!job) {
+    buttonText.textContent = 'Summarize Discussion';
+    return;
+  }
+
+  if (job.status === 'running') {
+    buttonText.textContent = 'Summarize Discussion';
+    elements.summaryStatus.textContent = 'Summarizing in the background — you can close this popup.';
+    elements.summaryStatus.classList.remove('hidden');
+    return;
+  }
+
+  if (job.status === 'complete' && job.result) {
+    const resultsWereHidden = elements.results.classList.contains('hidden');
+    const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+
+    buttonText.textContent = 'Refresh Summary';
+    elements.summaryStatus.textContent = `Summary ready · ${formatJobTime(job.updatedAt)}`;
+    elements.summaryStatus.classList.add('success');
+    elements.summaryStatus.classList.remove('hidden');
+    displaySummary(job.result);
+    elements.results.classList.remove('hidden');
+    if (resultsWereHidden || activeTab === 'summary') {
+      switchTab('summary');
+    }
+    return;
+  }
+
+  if (job.status === 'error') {
+    buttonText.textContent = 'Try Again';
+    elements.summaryStatus.textContent = job.error || 'Summarization failed. Try again.';
+    elements.summaryStatus.classList.add('error');
+    elements.summaryStatus.classList.remove('hidden');
+  }
+}
+
+function formatJobTime(timestamp) {
+  if (!timestamp) return 'just now';
+
+  return new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit'
+  }).format(new Date(timestamp));
 }
 
 /**

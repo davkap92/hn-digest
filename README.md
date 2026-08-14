@@ -5,6 +5,7 @@ AI-powered summaries of Hacker News discussions.
 ## Features
 
 - 📝 **Summarize Discussions** - Get TL;DR, key points, and sentiment analysis
+- ⏳ **Background Summaries** - Close the popup and return when the summary is ready
 - 🔍 **Find Interesting Comments** - AI identifies the most valuable comments
 - 📊 **Discussion Stats** - Comment counts, top authors, thread depth
 - 🔑 **BYOK (Bring Your Own Key)** - Use your OpenAI or OpenRouter API key
@@ -27,7 +28,7 @@ AI-powered summaries of Hacker News discussions.
    - **OpenAI** - Direct GPT access ([Get API key](https://platform.openai.com/api-keys))
    - **OpenRouter** - 100+ models, often cheaper ([Get API key](https://openrouter.ai/keys))
 4. Enter your API key
-5. For OpenRouter, optionally choose a reasoning effort for supported models
+5. For OpenRouter, optionally turn reasoning off or choose an effort supported by the model
 6. Click "Test Connection" to verify
 7. Save settings
 
